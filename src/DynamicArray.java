@@ -5,7 +5,8 @@ import java.util.Stack;
 
 public class DynamicArray {
 
-    Tree tree;
+    private Tree tree;
+    private Stack s = new Stack();
 
     public DynamicArray() {
         tree = null;
@@ -17,7 +18,10 @@ public class DynamicArray {
     }
 
     public void set(DynamicArray a, int i, int value) {
-        
+        // push till stakcen
+        // ändra
+        // - pekar rätt, tidigare ver
+        // s.push(a);
     }
 
     public int get(DynamicArray a, int i) {
@@ -29,11 +33,7 @@ public class DynamicArray {
     }
 
     public static void main(String[] args) {
-        while (true) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            String input = reader.lines().collect(Collectors.joining("\n"));
-
-            Stack<DynamicArray> s = new Stack<>();
-        }
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        String input = reader.lines().collect(Collectors.joining("\n"));
     }
 }
