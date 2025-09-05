@@ -1,15 +1,16 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
-import java.util.Stack;
 
 public class DynamicArray {
-
-    private Tree tree;
-    private Stack s = new Stack();
+    Node root;
 
     public DynamicArray() {
-        tree = null;
+        this.root = null;
+    }
+
+    private DynamicArray(Node root){
+        this.root = root;
     }
     
     public DynamicArray newarray() {
@@ -17,22 +18,40 @@ public class DynamicArray {
         return newArray;
     }
 
-    public void set(DynamicArray a, int i, int value) {
-        // push till stakcen
-        // ändra
-        // - pekar rätt, tidigare ver
-        // s.push(a);
+    public DynamicArray set(int i, int value) {
+        Node newRoot = updateNode(root, i, value, 31);
+        return new DynamicArray(newRoot);
+    }
+
+    private static Node updateNode(Node node, int i, int value, int bit) {
+        boolean bitIsOne = ((i >>> bit) & 1) == 1; // Shifts MSB to the LSB and masks that bit
+        if (bit < 0) {
+            return new Node(value, null, null); // New leaf is created
+        }
+        if (node == null){
+            return new Node(null, null, null); // Creates path to index if there isn't an existing one
+        } 
+        if (bitIsOne) {
+            return new Node(node.value, node.left, updateNode(node.right, i, value, bit- 1)); // Keeps the left side, and updates the right side
+        } else {
+            return new Node(node.value, updateNode(node.left, i, value, bit - 1), node.right);
+        }
     }
 
     public int get(DynamicArray a, int i) {
-        return 0;
-    }
-
-    private int getHeight() {
-        return 0;
+        Node node=a.root;
+        for (int bit = 31; bit >= 0; bit--) {
+            if (((i >>> bit) & 1) == 1){
+                node=node.right;
+            } else {
+                node= node.left;
+            }
+        }   return node.value;
     }
 
     public static void main(String[] args) {
+        Stack treeStack;
+
         BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
         String input = reader.lines().collect(Collectors.joining("\n"));
     }

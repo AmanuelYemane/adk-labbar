@@ -1,16 +1,10 @@
-public class Node {
-    
+class Node {
+    Integer value;
     Node left, right;
-    int value;
 
-    public Node(Node left, Node right, int value) {
+    Node(Integer value, Node left, Node right) {
+        this.value = value;
         this.left = left;
         this.right = right;
-        this.value = value;
     }
-    
-    public boolean isLeaf() {
-        return left == null && right == null;
-    }
-    
 }
