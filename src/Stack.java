@@ -17,6 +17,10 @@ public class Stack {
 
     // Pop ett DynamicArray-objekt
     public DynamicArray pop() {
+        if (isEmpty()) {
+            System.out.println("There are no Dynamic arrays in this stack");
+            return null;
+        }
         return stackArray[top--];
     }
 
