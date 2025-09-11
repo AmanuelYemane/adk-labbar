@@ -4,7 +4,7 @@ import java.io.InputStreamReader;
 
 public class DynamicArray {
     private Node root;
-    private static Stack stack = new Stack(1000);
+    private static Stack stack = new Stack(100000);
 
     public DynamicArray(Node root) {
         this.root = root;
@@ -108,7 +108,7 @@ public class DynamicArray {
             line = line.trim().toLowerCase();
 
             if (line.equals("unset")) {
-                tree = stack.pop();
+                tree = stack.pop(tree);
             }
             if (line.matches("^get \\d+")) {
                 String[] parts = line.split(" ");

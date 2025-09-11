@@ -12,14 +12,12 @@ public class Stack {
     // Push ett DynamicArray-objekt
     public void push(DynamicArray array) {
         stackArray[++top] = array;
-        System.out.println("A new version has been pushed");
     }
 
     // Pop ett DynamicArray-objekt
-    public DynamicArray pop() {
+    public DynamicArray pop(DynamicArray tree) {
         if (isEmpty()) {
-            System.out.println("There are no dynamic arrays in this stack");
-            return null;
+            return tree;
         }
         return stackArray[top--];
     }
