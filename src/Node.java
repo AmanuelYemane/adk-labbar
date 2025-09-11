@@ -11,7 +11,7 @@ class Node {
     }
 
     public boolean isLeaf() {
-        return left == null && right == null;
+        return height == -1;
     }
 
     public int getValue() {
