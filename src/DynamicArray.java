@@ -1,6 +1,6 @@
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.stream.Collectors;
 
 public class DynamicArray {
     Node root;
@@ -27,12 +27,7 @@ public class DynamicArray {
 
     private static Node updateNode(Node root, int i, Integer value, int height) {
         if (height < 0) {
-            if (root == null) {
-                return new Node(value, null, null, -1);
-            } else {
-                root.value = value;
-                return root;
-            }
+            return new Node(value, null, null, -1);
         }
 
         if (root == null) {
@@ -47,12 +42,12 @@ public class DynamicArray {
             root.left = updateNode(root.left, i, value, height - 1);
         }
 
-        return root;
+        return new Node(null, root.left, root.right, height);
     }
 
     public int get(DynamicArray a, int i) {
         Node node = a.root;
-        
+
         int requiredHeight = 0;
         if (i != 0) {
             requiredHeight = (31 - Integer.numberOfLeadingZeros(i));
@@ -66,14 +61,8 @@ public class DynamicArray {
                 return 0;
             }
             if (((i >>> bit) & 1) == 1) {
-                // if (node.isLeaf()) {
-                //     return node.value;
-                // }
                 node = node.right;
             } else {
-                // if (node.isLeaf()) {
-                //     return node.value;
-                // }
                 node = node.left;
             }
         }
@@ -84,7 +73,7 @@ public class DynamicArray {
     }
 
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         DynamicArray tree = newarray();
 
         tree = tree.set(tree, 0, 5);
@@ -108,7 +97,31 @@ public class DynamicArray {
         tree = tree.set(tree, 200, 13);
         System.out.println(tree.get(tree, 200));
 
-        // BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-        // String input = reader.lines().collect(Collectors.joining("\n"));
+        Stack stack = new Stack(1000);
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            line = line.trim().toLowerCase();
+
+            if (line.equals("unset")) {
+                System.out.println("Du skrev unset");
+                stack.pop();
+            }
+            if (line.matches("^get \\d+")) {
+                String[] parts = line.split(" ");
+                int i = Integer.parseInt(parts[1]);
+                //DynamicArray tree = stack.pop();
+                tree.get(tree, i);
+            }
+            if (line.matches("^set \\d+ \\d+")) {
+                String[] parts = line.split(" ");
+                int i = Integer.parseInt(parts[1]);
+                int value = Integer.parseInt(parts[2]);
+                //DynamicArray tree = stack.pop();
+                tree.set(tree, i, value);
+            }
+
+        }
     }
 }
