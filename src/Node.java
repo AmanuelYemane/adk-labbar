@@ -1,9 +1,12 @@
-public class Node {
+class Node {
+    Integer value;
+    Node left, right;
+    int height;
 
-    private boolean isLeaf;
-
-    public Node() {
-        isLeaf = false;
+    Node(Integer value, Node left, Node right, int height) {
+        this.value = value;
+        this.left = left;
+        this.right = right;
+        this.height = height;
     }
-    
 }

@@ -1,39 +1,128 @@
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.stream.Collectors;
-import java.util.Stack;
 
 public class DynamicArray {
+    private Node root;
+    private static Stack stack = new Stack(100000);
 
-    Tree tree;
-
-    public DynamicArray() {
-        tree = null;
+    public DynamicArray(Node root) {
+        this.root = root;
     }
     
-    public DynamicArray newarray() {
-        DynamicArray newArray = new DynamicArray();
-        return newArray;
+    public static DynamicArray newarray() {
+        return new DynamicArray(new Node(null, null, null, 0));
     }
 
-    public void set(DynamicArray a, int i, int value) {
-        
+    public DynamicArray set(DynamicArray a, int i, Integer value) {
+        stack.push(a);
+
+        int requiredHeight = 31 - Integer.numberOfLeadingZeros(i);
+        Node root = a.root;
+
+        while (root.height < requiredHeight) {
+            root = new Node(null, root, null, root.height + 1);
+        }
+
+        Node newRoot = updateNode(root, i, value, root.height);
+        return new DynamicArray(newRoot);
+    }
+
+    private static Node updateNode(Node root, int i, Integer value, int height) {
+        if (height < 0) {
+            return new Node(value, null, null, -1);
+        }
+
+        if (root == null) {
+            root = new Node(null, null, null, height);
+        }
+
+        boolean bitIsOne = ((i >>> height) & 1) == 1;
+        Node newRight = root.right;
+        Node newLeft = root.left;
+
+        if (bitIsOne) {
+            newRight = updateNode(root.right, i, value, height - 1);
+        } else {
+            newLeft = updateNode(root.left, i, value, height - 1);
+        }
+
+        return new Node(null, newLeft, newRight, height);
     }
 
     public int get(DynamicArray a, int i) {
-        return 0;
+        Node node = a.root;
+
+        int requiredHeight = 0;
+        if (i != 0) {
+            requiredHeight = (31 - Integer.numberOfLeadingZeros(i));
+        }
+        if (requiredHeight > node.height) {
+            return 0;
+        }
+
+        for (int bit = node.height; bit >= 0; bit--) {
+            if (node == null) {
+                return 0;
+            }
+            if (((i >>> bit) & 1) == 1) {
+                node = node.right;
+            } else {
+                node = node.left;
+            }
+        }
+        if (node == null || node.value == null) {
+            return 0;
+        }
+        return node.value;
     }
 
-    private int getHeight() {
-        return 0;
-    }
 
-    public static void main(String[] args) {
-        while (true) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
-            String input = reader.lines().collect(Collectors.joining("\n"));
+    public static void main(String[] args) throws IOException {
+        DynamicArray tree = newarray();
 
-            Stack<DynamicArray> s = new Stack<>();
+        // tree = tree.set(tree, 0, 5);
+        // System.out.println(tree.get(tree, 0));
+        // System.out.println(tree.root.height);
+        // System.out.println(tree.get(tree, 2));
+        // System.out.println(tree.get(tree, 10));
+
+        // tree = tree.set(tree, 2, 5);
+        // System.out.println(tree.get(tree, 2));
+        // System.out.println(tree.get(tree, 1));
+        // System.out.println(tree.get(tree, 10));
+        
+        // tree = tree.set(tree, 7, 10);
+        // System.out.println(tree.get(tree, 2));
+        // System.out.println(tree.get(tree, 7));
+
+        // tree = tree.set(tree, 7, 42);
+        // System.out.println(tree.get(tree, 7));
+        
+        // tree = tree.set(tree, 200, 13);
+        // System.out.println(tree.get(tree, 200));
+
+        BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+        String line;
+        while ((line = reader.readLine()) != null) {
+            line = line.trim().toLowerCase();
+
+            if (line.equals("unset")) {
+                tree = stack.pop(tree);
+            }
+            if (line.matches("^get \\d+")) {
+                String[] parts = line.split(" ");
+                int i = Integer.parseInt(parts[1]);
+                int value = tree.get(tree, i);
+                System.out.println(value);
+            }
+            if (line.matches("^set \\d+ \\d+")) {
+                String[] parts = line.split(" ");
+                int i = Integer.parseInt(parts[1]);
+                int value = Integer.parseInt(parts[2]);
+                tree = tree.set(tree, i, value);
+            }
+
         }
     }
 }
