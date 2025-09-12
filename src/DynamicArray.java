@@ -11,7 +11,7 @@ public class DynamicArray {
     }
     
     public static DynamicArray newarray() {
-        return new DynamicArray(new Node(null, null, null, 0));
+        return new DynamicArray(new Node(null, null, null, -1));
     }
 
     public DynamicArray set(DynamicArray a, int i, Integer value) {
@@ -66,10 +66,7 @@ public class DynamicArray {
         Node node = a.root;
 
         // Se till att index utanför arrayens nuvarande kapacitet returnerar 0
-        int requiredHeight = 0;
-        if (i != 0) {
-            requiredHeight = (31 - Integer.numberOfLeadingZeros(i));
-        }
+        int requiredHeight = (31 - Integer.numberOfLeadingZeros(i));
         if (requiredHeight > node.height) {
             return 0;
         }
