@@ -64,9 +64,36 @@ public class ClosestWords {
   // return res;
   // }
 
-  int distance(String w1, String w2) {
-    int[][] M = createMatrix(w1.length(), w2.length());
-    return partDist(w1, w2, w1.length(), w2.length(), M);
+  int distance(String w1, String w2, int maxDist) {
+    int w1len = w1.length();
+    int w2len = w2.length();
+    // int[][] M = createMatrix(w1.length(), w2.length());
+    if (Math.abs(w1len-w2len) > maxDist) return maxDist + 1;
+    if (w1len < w2len) {
+      String tmp = w1;
+      w1 = w2;
+      w2 = tmp;
+      int tmpLen = w1len;
+      w1len = w2len;
+      w2len = tmpLen;
+    }
+    int[] prev = new int[w2len + 1];
+    int[] curr = new int[w2len + 1];
+
+    for (int j = 0; j < w2len + 1; j++)
+      prev[j] = j;
+    for (int i = 1; i < w1len + 1; i++) {
+      curr[0] = i;
+      for (int j = 1; j < w2len + 1; j++) {
+        int cost = (w1.charAt(i - 1) == w2.charAt(j - 1)) ? 0 : 1;
+        curr[j] = Math.min(Math.min(curr[j - 1] + 1, prev[j] + 1), prev[j - 1] + cost);
+      }
+      int[] tmp = prev;
+      prev = curr;
+      curr = tmp;
+    }
+    return prev[w2len];
+    // return partDist(w1, w2, w1len, w2len, prev, curr);
   }
 
   int[][] createMatrix(int w1len, int w2len) {
@@ -87,8 +114,10 @@ public class ClosestWords {
 
   public ClosestWords(String w, List<String> wordList) {
     for (String s : wordList) {
-      int dist = distance(w, s);
+      int maxDist = (closestDistance == -1 ? Integer.MAX_VALUE : closestDistance);
+      int dist = distance(w, s, maxDist);
       // System.out.println("d(" + w + "," + s + ")=" + dist);
+
       if (dist < closestDistance || closestDistance == -1) {
         closestDistance = dist;
         closestWords = new LinkedList<String>();
