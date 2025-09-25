@@ -1,14 +1,9 @@
-
-/* Labb 2 i DD2350 Algoritmer, datastrukturer och komplexitet    */
-/* Se labbinstruktionerna i kursrummet i Canvas                  */
-/* Ursprunglig författare: Viggo Kann KTH viggo@nada.kth.se      */
 import java.util.LinkedList;
 import java.util.List;
 
 public class ClosestWords {
-  LinkedList<String> closestWords = null;
-
-  int closestDistance = -1;
+    LinkedList<String> closestWords = null;
+    int closestDistance = -1;
 
   // skapa en dynprogmatris av storlek 40x40 (denna storlek har visat sig räcka
   // för att klara alla test)
@@ -83,22 +78,23 @@ public class ClosestWords {
 
       int dist = distance(w, s, maxDist);
 
-      if (dist < closestDistance || closestDistance == -1) {
-        closestDistance = dist;
-        closestWords = new LinkedList<String>();
-        closestWords.add(s);
-      } else if (dist == closestDistance)
-        closestWords.add(s);
+        if (dist < closestDistance || closestDistance == -1) {
+            closestDistance = dist;
+            closestWords = new LinkedList<>();
+            closestWords.add(s);
+        } else if (dist == closestDistance) {
+            closestWords.add(s);
+        }
+      }
     }
-  }
 
-  int getMinDistance() {
-    return closestDistance;
-  }
+    int getMinDistance() {
+        return closestDistance;
+    }
 
-  List<String> getClosestWords() {
-    return closestWords;
-  }
+    List<String> getClosestWords() {
+        return closestWords;
+    }
 }
 
 /*
