@@ -10,113 +10,78 @@ public class ClosestWords {
 
   int closestDistance = -1;
 
-  // int partDist(String w1, String w2, int w1len, int w2len) {
-  // int[][] M = new int[w1len + 1][w2len + 1];
+  // skapa en dynprogmatris av storlek 40x40 (denna storlek har visat sig räcka
+  // för att klara alla test)
+  int[][] M = new int[40][40];
 
-  // for (int i = 0; i < w1len + 1; i++) M[i][0] = i;
-  // for (int j = 0; j < w2len + 1; j++) M[0][j] = j;
-
-  // for (int i = 1; i < w1len + 1; i++) {
-  // for (int j = 1; j < w2len + 1; j++) {
-  // if (w1.charAt(i - 1) == w2.charAt(j - 1)) {
-  // M[i][j] = M[i - 1][j - 1];
-  // } else {
-  // int shortest = Math.min(M[i][j - 1], M[i - 1][j - 1]);
-  // shortest = Math.min(shortest, M[i - 1][j]);
-  // M[i][j] = shortest + 1;
-  // }
-  // }
-  // }
-  // return M[w1len][w2len];
-  // }
-
-  int partDist(String w1, String w2, int w1len, int w2len, int[][] M) {
-    if (M[w1len][w2len] != -1)
-      return M[w1len][w2len];
-    if (w1len == 0)
-      return w2len;
-    if (w2len == 0)
-      return w1len;
-    if (w1.charAt(w1len - 1) == w2.charAt(w2len - 1)) {
-      M[w1len][w2len] = partDist(w1, w2, w1len - 1, w2len - 1, M);
-      return M[w1len][w2len];
-    }
-    int shortest = Math.min(partDist(w1, w2, w1len, w2len - 1, M), partDist(w1, w2, w1len - 1, w2len - 1, M));
-    shortest = Math.min(shortest, partDist(w1, w2, w1len - 1, w2len, M));
-
-    M[w1len][w2len] = 1 + shortest;
-    return M[w1len][w2len];
-  }
-
-  // int partDist(String w1, String w2, int w1len, int w2len) {
-  // if (w1len == 0)
-  // return w2len;
-  // if (w2len == 0)
-  // return w1len;
-  // int res = partDist(w1, w2, w1len - 1, w2len - 1) +
-  // (w1.charAt(w1len - 1) == w2.charAt(w2len - 1) ? 0 : 1);
-  // int addLetter = partDist(w1, w2, w1len - 1, w2len) + 1;
-  // if (addLetter < res)
-  // res = addLetter;
-  // int deleteLetter = partDist(w1, w2, w1len, w2len - 1) + 1;
-  // if (deleteLetter < res)
-  // res = deleteLetter;
-  // return res;
-  // }
+  String prev = "";
 
   int distance(String w1, String w2, int maxDist) {
     int w1len = w1.length();
     int w2len = w2.length();
-    // int[][] M = createMatrix(w1.length(), w2.length());
-    if (Math.abs(w1len-w2len) > maxDist) return maxDist + 1;
-    if (w1len < w2len) {
-      String tmp = w1;
-      w1 = w2;
-      w2 = tmp;
-      int tmpLen = w1len;
-      w1len = w2len;
-      w2len = tmpLen;
-    }
-    int[] prev = new int[w2len + 1];
-    int[] curr = new int[w2len + 1];
 
-    for (int j = 0; j < w2len + 1; j++)
-      prev[j] = j;
-    for (int i = 1; i < w1len + 1; i++) {
-      curr[0] = i;
-      for (int j = 1; j < w2len + 1; j++) {
-        int cost = (w1.charAt(i - 1) == w2.charAt(j - 1)) ? 0 : 1;
-        curr[j] = Math.min(Math.min(curr[j - 1] + 1, prev[j] + 1), prev[j - 1] + cost);
-      }
-      int[] tmp = prev;
-      prev = curr;
-      curr = tmp;
-    }
-    return prev[w2len];
-    // return partDist(w1, w2, w1len, w2len, prev, curr);
+    // för ord vars längd skiljer sig på x bokstäver i längd kommer avståndet vara
+    // minst x
+    // vi avbryter därför sökningen för ett ord om x är större än det kortaste
+    // avståndet hittils
+    // returnerar maxDist+1 för att bara ignorera ordet i konstruktorn för
+    // ClosestWords
+    if (Math.abs(w1len - w2len) > maxDist)
+      return maxDist + 1;
+
+    return partDist(w1, w2, w1len, w2len);
   }
 
-  int[][] createMatrix(int w1len, int w2len) {
-    int[][] M = new int[w1len + 1][w2len + 1];
+  int partDist(String w1, String w2, int w1len, int w2len) {
+    int row = 1;
 
-    for (int i = 0; i < w1len + 1; i++)
-      M[i][0] = i;
-    for (int j = 0; j < w2len + 1; j++)
-      M[0][j] = j;
-
-    for (int i = 1; i < w1len + 1; i++) {
-      for (int j = 1; j < w2len + 1; j++) {
-        M[i][j] = -1;
+    // kolla om det är några bokstäver i början av det nya ordet som är samma som i
+    // det föregående ordet
+    // om vi har p bokstäver som är samma kan vi återanvända de p+1 första raderna i
+    // matrisen
+    for (int i = 1; i < Math.min(prev.length(), w2len) + 1; i++) {
+      if (prev.charAt(i - 1) == w2.charAt(i - 1)) {
+        row++;
+      } else {
+        break;
       }
     }
-    return M;
+
+    // fyll i matrisen
+    for (int i = 1; i < w1len + 1; i++) { // varje kolumn utom den första
+      for (int j = row; j < w2len + 1; j++) { // varje rad utom de p+1 första
+
+        // samma värde som på diagonalen om samma bokstav
+        if (w1.charAt(i - 1) == w2.charAt(j - 1)) {
+          M[i][j] = M[i - 1][j - 1];
+        } else {
+          // annars det minsta av värdena i diagonalen, till vänster och ovanför plus ett
+          int shortest = Math.min(Math.min(M[i][j - 1], M[i - 1][j - 1]), M[i - 1][j]);
+          M[i][j] = shortest + 1;
+        }
+      }
+    }
+
+    prev = w2;
+
+    return M[w1len][w2len];
   }
 
   public ClosestWords(String w, List<String> wordList) {
+
+    // fyll i värden för första raden och första kolumnen
+    for (int i = 0; i < 40; i++) {
+      M[i][0] = i;
+      M[0][i] = i;
+    }
+
     for (String s : wordList) {
+
+      // spara kortaste avståndet hittills, använd för att sluta söka, sätter -1 till
+      // största integer-värdet för att kunna använda i jämförelse
       int maxDist = (closestDistance == -1 ? Integer.MAX_VALUE : closestDistance);
+
       int dist = distance(w, s, maxDist);
-      // System.out.println("d(" + w + "," + s + ")=" + dist);
 
       if (dist < closestDistance || closestDistance == -1) {
         closestDistance = dist;
@@ -135,3 +100,17 @@ public class ClosestWords {
     return closestWords;
   }
 }
+
+/*
+ * Testkörningar för large (test: testmedordlista4) med olika optimeringar för programmet
+ * Alla optimeringar: 32 ms
+ * Med jämförelse av de första bokstäverna i ett ordet (och dynprogmatris): 42 ms
+ * Med jämförelse med maxDist för avbryta sökning tidigare (och dynprogmatris): 47 ms
+ * Bara införandet av dynprogmatris M: 66 ms
+ * 
+ * När vi körde med en lokal matris som krävde att vi skapade en helt ny matris
+ * som vi fyllde i på nytt för varje ord och körde programmet med den utan någon
+ * annan optimering körde programmet samma tester på ungeför 130 ms, det vill
+ * säga att den globala matrisen effektiviserade programmet mycket och fick det
+ * att köra dubbelt så snabbt
+ */
