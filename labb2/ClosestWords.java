@@ -104,13 +104,8 @@ public class ClosestWords {
 /*
  * Testkörningar för large (test: testmedordlista4) med olika optimeringar för programmet
  * Alla optimeringar: 32 ms
- * Med jämförelse av de första bokstäverna i ett ordet (och dynprogmatris): 42 ms
- * Med jämförelse med maxDist för avbryta sökning tidigare (och dynprogmatris): 47 ms
- * Bara införandet av dynprogmatris M: 66 ms
- * 
- * När vi körde med en lokal matris som krävde att vi skapade en helt ny matris
- * som vi fyllde i på nytt för varje ord och körde programmet med den utan någon
- * annan optimering körde programmet samma tester på ungeför 130 ms, det vill
- * säga att den globala matrisen effektiviserade programmet mycket och fick det
- * att köra dubbelt så snabbt
+ * Med jämförelse av de första bokstäverna i ett ord (och global dynprogmatris): 42 ms
+ * Med jämförelse med maxDist för att avbryta sökning tidigare (och global dynprogmatris): 47 ms
+ * Med bara en global dynprogmatris: 66 ms
+ * Med bara en lokal dynprogmatris: 178 ms
  */
