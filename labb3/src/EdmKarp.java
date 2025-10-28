@@ -1,160 +1,139 @@
-
-/**
- * Exempel på in- och utdatahantering för maxflödeslabben i kursen
- * ADK.
- *
- * Använder Kattio.java för in- och utläsning.
- * Se http://kattis.csc.kth.se/doc/javaio
- *
- * @author: Per Austrin
- */
-
 import java.util.ArrayList;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.Queue;
 
 public class EdmKarp {
-	Kattio io;
+    Kattio io;
 
-	int x, y, e, s, t, v, totFlow;
+    int v, s, t, e;
+    int[][] capacity;
+    int[][] flow;
+    ArrayList<Integer>[] adj; // grannlista (för restflödesgrafen)
+    ArrayList<int[]> originalEdges = new ArrayList<>();
+    int totFlow = 0;
 
-	ArrayList<int[]> bipEdges = new ArrayList<>();
-	ArrayList<int[]> flowEdges = new ArrayList<>();
-	ArrayList<int[]> backFlowEdges = new ArrayList<>();
-	ArrayList<int[]> maxFlowEdges = new ArrayList<>();
+    void readFlowGraph() {
+        v = io.getInt();
+        s = io.getInt();
+        t = io.getInt();
+        e = io.getInt();
 
-	void readBipartiteGraph() {
-		// Läs antal hörn och kanter
-		x = io.getInt(); // antal noder i vänstra mängden
-		y = io.getInt(); // antal noder i högra mängden
-		e = io.getInt(); // antal kanter
-
-		// Läs in kanterna
-		for (int i = 0; i < e; ++i) {
-			int a = io.getInt();
-			int b = io.getInt();
-			int[] edge = { a, b };
-			bipEdges.add(edge);
-		}
-	}
-
-	void writeFlowGraph() {
-		s = 1; // källa
-		t = x + y + 2; // utlopp
-		v = x + y + 2; // totala antalet noder
-
-		int eFlow = x + y + e;
-
-		// Skriv ut antal hörn och kanter samt källa och utlopp
-		io.println(v);
-		io.println(s + " " + t);
-		io.println(eFlow);
-
-		// Kant från källa till a (vänstermängden)
-		for (int i = 1; i <= x; i++) {
-			io.println(s + " " + (i + 1) + " 1");
+        capacity = new int[v + 1][v + 1];
+        flow = new int[v + 1][v + 1];
+        adj = new ArrayList[v + 1];
+        for (int i = 0; i <= v; i++) {
+			adj[i] = new ArrayList<>();
 		}
 
-		for (int i = 0; i < e; i++) {
-			int left = bipEdges.get(i)[0] + 1;
-			int right = bipEdges.get(i)[1] + 1;
-			// Kant från a till b med kapacitet c
-			io.println(left + " " + right + " 1");
-		}
+        for (int i = 0; i < e; i++) {
+            int a = io.getInt();
+            int b = io.getInt();
+            int c = io.getInt();
 
-		// Kant från b till utlopp
-		for (int i = 1; i <= y; i++) {
-			io.println((x + i + 1) + " " + t + " 1");
-		}
+			
+            originalEdges.add(new int[]{a, b, c});
 
-		// Var noggrann med att flusha utdata när flödesgrafen skrivits ut!
-		io.flush();
+            capacity[a][b] = c;
 
-		// Debugutskrift
-		System.err.println("Skickade iväg flödesgrafen");
-	}
+			// Går åt båda  hållen
+			adj[a].add(b);
+			adj[b].add(a);
 
-	void readFlowGraph() {
-		v = io.getInt();
-		s = io.getInt();
-		t = io.getInt();
-		e = io.getInt();
+        }
+    }
 
-		for (int i = 0; i < e; i++) {
-			int a = io.getInt();
-			int b = io.getInt();
-			int cap = io.getInt();
+    int bfs(int[] parent) {
+        Arrays.fill(parent, -1);
+        parent[s] = -2; // markerar källa som besökt
+        int[] bottleneck = new int[v + 1];
+        bottleneck[s] = Integer.MAX_VALUE;
 
-			int initialFlow = 0;
+        Queue<Integer> q = new ArrayDeque<>();
+        q.add(s);
 
-			int[] edge = { a, b, cap, initialFlow };
-			int[] backEdge = { b, a, cap, initialFlow };
-			flowEdges.add(edge);
-			backFlowEdges.add(backEdge);
-		}
-	}
+        while (!q.isEmpty()) {
+            int u = q.poll();
+            for (int next : adj[u]) {
+                // restkapacitet
+                int residual = capacity[u][next] - flow[u][next];
+                if (parent[next] == -1 && residual > 0) {
+                    parent[next] = u;
+                    bottleneck[next] = Math.min(bottleneck[u], residual);
+                    if (next == t) {
+                        return bottleneck[t];
+                    }
+                    q.add(next);
+                }
+            }
+        }
+        return 0; // hittade ingen stig
+    }
 
-	void edmKarp() {
-		
-	}
+    int edmondsKarp() {
+        int total = 0;
+        int[] parent = new int[v + 1];
 
-	void readMaxFlowSolution() {
-		// Läs in antal hörn, kanter, källa, utlopp, och totalt flöde
-		// (Antal hörn, källa och utlopp borde vara samma som vi i grafen vi
-		// skickade iväg)
-		v = io.getInt();
-		s = io.getInt();
-		t = io.getInt();
-		totFlow = io.getInt();
-		e = io.getInt();
+        while (true) {
+            int bottleneck = bfs(parent);
+            if (bottleneck == 0) {
+				break;
+			}
 
-		for (int i = 0; i < e; ++i) {
-			// Flöde f från a till b
-			int a = io.getInt();
-			int b = io.getInt();
-			int f = io.getInt();
+            // augmentera flödet längs vägen
+            int cur = t;
+            while (cur != s) {
+                int prev = parent[cur];
+                flow[prev][cur] += bottleneck;
+                flow[cur][prev] -= bottleneck; // bakflöde
+                cur = prev;
+            }
+            total += bottleneck;
+        }
 
-			if (f > 0 && a > s && a <= x + 1 && b >= x + 2 && b < t) {
-				int left = a - 1;
-				int right = b - 1;
-				int[] edge = { left, right };
-				maxFlowEdges.add(edge);
+        totFlow = total;
+        return total;
+    }
+
+    void writeFlowSolution() {
+        io.println(v);
+        io.println(s + " " + t);
+        io.println(totFlow);
+
+		ArrayList<int[]> edgesWithFlow = new ArrayList<>(); 
+		for (int[] edge : originalEdges) {
+			int u = edge[0];
+			int w = edge[1];
+			int f = flow[u][w];
+
+			int[] newEdge = { u, w, f };
+			if (f > 0) {
+				edgesWithFlow.add(newEdge);
 			}
 		}
-	}
-
-	void writeBipMatchSolution() {
-		// Skriv ut antal hörn och storleken på matchningen
-		io.println(x + " " + y);
-		io.println(totFlow);
-
-		for (int[] edge : maxFlowEdges) {
-			int a = edge[0];
-			int b = edge[1];
-			io.println(a + " " + b);
-
+    
+    	io.println(edgesWithFlow.size()); // antal kanter med flöde > 0
+    
+		for (int[] edge : edgesWithFlow) {
+			io.println(edge[0] + " " + edge[1] + " " + edge[2]);
+		}
+			io.flush();
 		}
 
-		io.flush();
-	}
+    EdmKarp() {
+        io = new Kattio(System.in, System.out);
 
-	EdmKarp() {
-		io = new Kattio(System.in, System.out);
+        readFlowGraph();
 
-		readBipartiteGraph();
+        int maxFlow = edmondsKarp();
+        System.err.println("Computed max flow = " + maxFlow);
 
-		writeFlowGraph();
+        writeFlowSolution();
 
-		readMaxFlowSolution();
+        io.close();
+    }
 
-		writeBipMatchSolution();
-
-		// debugutskrift
-		System.err.println("Bipred avslutar\n");
-
-		// Kom ihåg att stänga ner Kattio-klassen
-		io.close();
-	}
-
-	public static void main(String args[]) {
-		new EdmKarp();
-	}
+    public static void main(String[] args) {
+        new EdmKarp();
+    }
 }
