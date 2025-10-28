@@ -1,18 +1,35 @@
+
 import java.util.ArrayList;
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Queue;
 
 public class BipRedEdmKarp {
+
+    static class Edge {
+        int to, rev, cap, flow;
+
+        Edge(int to, int rev, int cap) {
+            this.to = to;
+            this.rev = rev;
+            this.cap = cap;
+            this.flow = 0;
+        }
+    }
+
     Kattio io;
 
     int x, y, v, s, t, e;
     ArrayList<int[]> bipEdges = new ArrayList<>();
     ArrayList<int[]> maxFlowEdges = new ArrayList<>();
-    int[][] capacity;
-    int[][] flow;
+    ArrayList<Edge>[] graph;
     ArrayList<Integer>[] adj; // grannlista (för restflödesgrafen)
     int totFlow = 0;
+
+    void addEdge(int u, int v, int cap) {
+        graph[u].add(new Edge(v, graph[v].size(), cap));
+        graph[v].add(new Edge(u, graph[u].size() - 1, 0)); // reverse edge
+    }
 
     void readBipartiteGraph() {
         // Läs antal hörn och kanter
@@ -34,37 +51,32 @@ public class BipRedEdmKarp {
         t = x + y + 2; // utlopp
         v = x + y + 2; // totala antalet noder
 
-        capacity = new int[v + 1][v + 1];
-        flow = new int[v + 1][v + 1];
-        adj = new ArrayList[v + 1];
+        graph = new ArrayList[v + 1];
         for (int i = 0; i <= v; i++) {
-            adj[i] = new ArrayList<>();
+            graph[i] = new ArrayList<>();
         }
 
         // Källa till vänster
-        for (int i = 1; i <= x; i++) {
-            int left = i + 1;
-            capacity[s][left] = 1;
-            adj[s].add(left);
-            adj[left].add(s);
+        for (int a = 1; a <= x; a++) {
+            int left = a + 1;
+            addEdge(s, left, 1);
         }
 
         // Vänster till höger
-        for (int[] e : bipEdges) {
-            int a = e[0];
-            int b = e[1];
-            capacity[a][b] = 1;
-            adj[a].add(b);
-            adj[b].add(a);
+        for (int[] edge : bipEdges) {
+            int a = edge[0];
+            int b = edge[1];
+            int left = a + 1;
+            int right = b + 1;
+            addEdge(left, right, 1);
         }
 
         // Höger till utlopp
-        for (int i = 1; i <= y; i++) {
-            int right = x + i + 1;
-            capacity[right][t] = 1;
-            adj[right].add(t);
-            adj[t].add(right);
+        for (int b = x + 1; b <= x + y; b++) {
+            int right = b + 1;
+            addEdge(right, t, 1);
         }
+
     }
 
     int bfs(int[] parent) {
@@ -78,9 +90,9 @@ public class BipRedEdmKarp {
 
         while (!q.isEmpty()) {
             int u = q.poll();
-            for (int next : adj[u]) {
-                // restkapacitet
-                int residual = capacity[u][next] - flow[u][next];
+            for (Edge e : graph[u]) {
+                int next = e.to;
+                int residual = e.cap - e.flow;
                 if (parent[next] == -1 && residual > 0) {
                     parent[next] = u;
                     bottleneck[next] = Math.min(bottleneck[u], residual);
@@ -94,7 +106,7 @@ public class BipRedEdmKarp {
         return 0; // hittade ingen stig
     }
 
-    void edmondsKarp() {
+    int edmondsKarp() {
         int total = 0;
         int[] parent = new int[v + 1];
 
@@ -108,24 +120,34 @@ public class BipRedEdmKarp {
             int cur = t;
             while (cur != s) {
                 int prev = parent[cur];
-                flow[prev][cur] += bottleneck;
-                flow[cur][prev] -= bottleneck; // bakflöde
+                for (Edge e : graph[prev]) {
+                    if (e.to == cur) {
+                        e.flow += bottleneck;
+                        graph[cur].get(e.rev).flow -= bottleneck; // bakflöde
+                        break;
+                    }
+                }
                 cur = prev;
             }
             total += bottleneck;
         }
 
         totFlow = total;
+        return total;
     }
 
     void extractMatching() {
         maxFlowEdges.clear();
-        for (int[] edge : bipEdges) {
-            int a = edge[0];
-            int b = edge[1];
-            int f = flow[a][b];
-            if (f > 0 && a > s && a <= x + 1 && b >= x + 2 && b < t) {
-                maxFlowEdges.add(new int[] { a - 1, b - 1 });
+        for (int[] e : bipEdges) {
+            int a = e[0];
+            int b = e[1];
+            int left = a + 1;
+            int right = b + 1;
+            for (Edge edge : graph[left]) {
+                if (edge.to == right && edge.flow > 0) {
+                    maxFlowEdges.add(new int[] { a, b });
+                    break;
+                }
             }
         }
     }
@@ -151,7 +173,8 @@ public class BipRedEdmKarp {
 
         buildFlowGraph();
 
-        edmondsKarp();
+        int maxFlow = edmondsKarp();
+        System.err.println("Computed max flow = " + maxFlow);
 
         extractMatching();
 
