@@ -1,3 +1,4 @@
+
 /**
  * Exempel på in- och utdatahantering för maxflödeslabben i kursen
  * ADK.
@@ -8,11 +9,16 @@
  * @author: Per Austrin
  */
 
+import java.util.ArrayList;
+
 public class BipRed {
 	Kattio io;
 
-	int x, y, e;
-	int[] a, b;
+	int x, y, e, s, t, v;
+
+	ArrayList<int[]> bipEdges = new ArrayList<>();
+	ArrayList<int[]> maxFlowEdges = new ArrayList<>();
+	int totFlow;
 
 	void readBipartiteGraph() {
 		// Läs antal hörn och kanter
@@ -20,44 +26,44 @@ public class BipRed {
 		y = io.getInt(); // antal noder i högra mängden
 		e = io.getInt(); // antal kanter
 
-		a = new int[e];
-		b = new int[e];
-
 		// Läs in kanterna
 		for (int i = 0; i < e; ++i) {
-			a[i] = io.getInt();
-			b[i] = io.getInt();
+			int a = io.getInt();
+			int b = io.getInt();
+			int[] edge = { a, b };
+			bipEdges.add(edge);
 		}
 	}
 
 	void writeFlowGraph() {
-		int s = 1; // källa
-		int t = x + y + 2; // sänka
-		int v = x + y + 2; // totala antalet noder
+		s = 1; // källa
+		t = x + y + 2; // utlopp
+		v = x + y + 2; // totala antalet noder
 
-		int totEdges = x + y + e;
+		int eFlow = x + y + e;
 
-		// Skriv ut antal hörn och kanter samt källa och sänka
+		// Skriv ut antal hörn och kanter samt källa och utlopp
 		io.println(v);
 		io.println(s + " " + t);
-		io.println(totEdges);
+		io.println(eFlow);
 
 		// Kant från källa till a (vänstermängden)
 		for (int i = 1; i <= x; i++) {
-			io.println(s + " " + i + 1 + " 1");
+			io.println(s + " " + (i + 1) + " 1");
 		}
 
-		// Kan från b till sänka
+		for (int i = 0; i < e; i++) {
+			int left = bipEdges.get(i)[0] + 1;
+			int right = bipEdges.get(i)[1] + 1;
+			// Kant från a till b med kapacitet c
+			io.println(left + " " + right + " 1");
+		}
+		
+		// Kant från b till utlopp
 		for (int i = 1; i <= y; i++) {
 			io.println((x + i + 1) + " " + t + " 1");
 		}
 
-		for (int i = 0; i < e; i++) {
-			int left = a[i];
-			int right = x + b[i];
-			// Kant från a till b med kapacitet c
-			io.println(left + " " + right + " 1");
-		}
 		// Var noggrann med att flusha utdata när flödesgrafen skrivits ut!
 		io.flush();
 
@@ -66,36 +72,43 @@ public class BipRed {
 	}
 
 	void readMaxFlowSolution() {
-		// Läs in antal hörn, kanter, källa, sänka, och totalt flöde
-		// (Antal hörn, källa och sänka borde vara samma som vi i grafen vi
+		// Läs in antal hörn, kanter, källa, utlopp, och totalt flöde
+		// (Antal hörn, källa och utlopp borde vara samma som vi i grafen vi
 		// skickade iväg)
-		int v = io.getInt();
-		int s = io.getInt();
-		int t = io.getInt();
-		int totflow = io.getInt();
-		int e = io.getInt();
+		v = io.getInt();
+		s = io.getInt();
+		t = io.getInt();
+		totFlow = io.getInt();
+		e = io.getInt();
 
 		for (int i = 0; i < e; ++i) {
 			// Flöde f från a till b
 			int a = io.getInt();
 			int b = io.getInt();
 			int f = io.getInt();
+
+			if (f > 0 && a > s && a <= x + 1 && b >= x + 2 && b < t) {
+				int left = a - 1;
+				int right = b - 1;
+				int[] edge = { left, right };
+				maxFlowEdges.add(edge);
+			}
 		}
 	}
 
 	void writeBipMatchSolution() {
-		int x = 17, y = 4711, maxMatch = 0;
-
 		// Skriv ut antal hörn och storleken på matchningen
 		io.println(x + " " + y);
-		io.println(maxMatch);
+		io.println(totFlow);
 
-		for (int i = 0; i < maxMatch; ++i) {
-			int a = 5, b = 2323;
-			// Kant mellan a och b ingår i vår matchningslösning
+		for (int[] edge : maxFlowEdges) {
+			int a = edge[0];
+			int b = edge[1];
 			io.println(a + " " + b);
+			
 		}
 
+		io.flush();
 	}
 
 	BipRed() {
