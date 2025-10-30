@@ -20,6 +20,7 @@ public class BipRed {
 	ArrayList<int[]> maxFlowEdges = new ArrayList<>();
 	int totFlow;
 
+	/* Läser den bipartita grafen från standard input */
 	void readBipartiteGraph() {
 		// Läs antal hörn och kanter
 		x = io.getInt(); // antal noder i vänstra mängden
@@ -35,6 +36,7 @@ public class BipRed {
 		}
 	}
 
+	/* Skapar flödesgrafen och skriver till standard output */
 	void writeFlowGraph() {
 		s = 1; // källa
 		t = x + y + 2; // utlopp
@@ -71,6 +73,7 @@ public class BipRed {
 		System.err.println("Skickade iväg flödesgrafen");
 	}
 
+	/* Läser svarta lådaas lösning till flödesproblemet från standard input */
 	void readMaxFlowSolution() {
 		// Läs in antal hörn, kanter, källa, utlopp, och totalt flöde
 		// (Antal hörn, källa och utlopp borde vara samma som vi i grafen vi
@@ -87,7 +90,9 @@ public class BipRed {
 			int b = io.getInt();
 			int f = io.getInt();
 
+			// Lägg till kant om flödet är större än 0 och om a och b tillhör vänster- repsektive högermängden
 			if (f > 0 && a > s && a <= x + 1 && b >= x + 2 && b < t) {
+				// Vi vill ha 1-indexerat i den nya bipartita grafen, just nu är minsta a=2
 				int left = a - 1;
 				int right = b - 1;
 				int[] edge = { left, right };
@@ -96,11 +101,13 @@ public class BipRed {
 		}
 	}
 
+	/* Skriv största matchningen till standard output */
 	void writeBipMatchSolution() {
 		// Skriv ut antal hörn och storleken på matchningen
 		io.println(x + " " + y);
 		io.println(totFlow);
 
+		// Skriv ut alla kanter i matchningen
 		for (int[] edge : maxFlowEdges) {
 			int a = edge[0];
 			int b = edge[1];
@@ -122,7 +129,7 @@ public class BipRed {
 
 		writeBipMatchSolution();
 
-		// debugutskrift
+		// Debugutskrift
 		System.err.println("Bipred avslutar\n");
 
 		// Kom ihåg att stänga ner Kattio-klassen
