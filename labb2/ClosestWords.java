@@ -2,8 +2,8 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ClosestWords {
-    LinkedList<String> closestWords = null;
-    int closestDistance = -1;
+  LinkedList<String> closestWords = null;
+  int closestDistance = -1;
 
   // skapa en dynprogmatris av storlek 40x40 (denna storlek har visat sig räcka
   // för att klara alla test)
@@ -78,30 +78,33 @@ public class ClosestWords {
 
       int dist = distance(w, s, maxDist);
 
-        if (dist < closestDistance || closestDistance == -1) {
-            closestDistance = dist;
-            closestWords = new LinkedList<>();
-            closestWords.add(s);
-        } else if (dist == closestDistance) {
-            closestWords.add(s);
-        }
+      if (dist < closestDistance || closestDistance == -1) {
+        closestDistance = dist;
+        closestWords = new LinkedList<>();
+        closestWords.add(s);
+      } else if (dist == closestDistance) {
+        closestWords.add(s);
       }
     }
+  }
 
-    int getMinDistance() {
-        return closestDistance;
-    }
+  int getMinDistance() {
+    return closestDistance;
+  }
 
-    List<String> getClosestWords() {
-        return closestWords;
-    }
+  List<String> getClosestWords() {
+    return closestWords;
+  }
 }
 
 /*
- * Testkörningar för large (test: testmedordlista4) med olika optimeringar för programmet
+ * Testkörningar för large (test: testmedordlista4) med olika optimeringar för
+ * programmet
  * Alla optimeringar: 32 ms
- * Med jämförelse av de första bokstäverna i ett ord (och global dynprogmatris): 42 ms
- * Med jämförelse med maxDist för att avbryta sökning tidigare (och global dynprogmatris): 47 ms
+ * Med jämförelse av de första bokstäverna i ett ord (och global dynprogmatris):
+ * 42 ms
+ * Med jämförelse med maxDist för att avbryta sökning tidigare (och global
+ * dynprogmatris): 47 ms
  * Med bara en global dynprogmatris: 66 ms
  * Med bara en lokal dynprogmatris: 178 ms
  */
