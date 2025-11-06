@@ -19,8 +19,6 @@ edges = []
 for _ in range(e):
     edges.append(read_edge())
 
-num_actors = m + 2
-
 isolated_nodes = []
 for node in range(v):
     if all(node+1 not in edge for edge in edges):
@@ -28,6 +26,7 @@ for node in range(v):
 
 num_roles = v + len(isolated_nodes) + 3
 num_scenes = e + len(isolated_nodes) + 2
+num_actors = m + 2
 
 print(num_roles)
 print(num_scenes)
@@ -38,12 +37,12 @@ print("1 1") # p1
 print("1 2") # p2
 
 # garantera att vi får en roll som kan spela mot p1 och p2
-roles = str(m) + " " + " ".join(str(actor + 3) for actor in range(m))
-print(roles)
+actors = str(m) + " " + " ".join(str(actor + 3) for actor in range(m))
+print(actors)
 
 # skapa en roll för alla hörn med kant
 for _ in range(v):
-    print(roles)
+    print(actors)
 
 # skapa jokerroller, dvs roller som kan spela mot varje isolerat hörn
 for _ in isolated_nodes:
