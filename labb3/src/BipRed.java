@@ -73,7 +73,7 @@ public class BipRed {
 		System.err.println("Skickade iväg flödesgrafen");
 	}
 
-	/* Läser svarta lådaas lösning till flödesproblemet från standard input */
+	/* Läser svarta lådans lösning till flödesproblemet från standard input */
 	void readMaxFlowSolution() {
 		// Läs in antal hörn, kanter, källa, utlopp, och totalt flöde
 		// (Antal hörn, källa och utlopp borde vara samma som vi i grafen vi
