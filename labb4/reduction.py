@@ -19,6 +19,7 @@ edges = []
 for _ in range(e):
     edges.append(read_edge())
 
+# O(VE)
 isolated_nodes = []
 for node in range(v):
     if all(node+1 not in edge for edge in edges):
